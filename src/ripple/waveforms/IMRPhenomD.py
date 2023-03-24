@@ -18,7 +18,7 @@ from ..typing import Array
 from ripple import Mc_eta_to_ms
 
 
-def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array) -> Array:
+def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_00_sigma_2) -> Array:
     """
     Calculate the inspiral phase for the IMRPhenomD waveform.
     """
@@ -29,6 +29,8 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array) -> Array:
     m2_s = m2 * gt
     M_s = m1_s + m2_s
     eta = m1_s * m2_s / (M_s ** 2.0)
+
+    lambda_00_sigma_2_IMRPhenomD = -10114.056472621156
 
     # First lets construct the phase in the inspiral (region I)
     m1M = m1_s / M_s
@@ -164,7 +166,7 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array) -> Array:
         phi_TF2
         + (
             coeffs[7] * fM_s
-            + (3.0 / 4.0) * coeffs[8] * (fM_s ** (4.0 / 3.0))
+            + (3.0 / 4.0) * (coeffs[8] - lambda_00_sigma_2_IMRPhenomD + lambda_00_sigma_2) * (fM_s ** (4.0 / 3.0))
             + (3.0 / 5.0) * coeffs[9] * (fM_s ** (5.0 / 3.0))
             + (1.0 / 2.0) * coeffs[10] * (fM_s ** 2.0)
         )
@@ -395,7 +397,7 @@ def get_IIb_Amp(fM_s: Array, theta: Array, coeffs: Array, f_RD, f_damp) -> Array
 
 
 # @jax.jit
-def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array) -> Array:
+def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array, lambda_00_sigma_2: float) -> Array:
     """
     Computes the phase of the PhenomD waveform following 1508.07253.
     Sets time and phase of coealence to be zero.
@@ -415,7 +417,7 @@ def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array) -> Arr
     # f1, f2, _, _, f_RD, f_damp = get_transition_frequencies(theta, coeffs[5], coeffs[6])
     f1, f2, _, _, f_RD, f_damp = transition_freqs
 
-    phi_Ins = get_inspiral_phase(f * M_s, theta, coeffs)
+    phi_Ins = get_inspiral_phase(f * M_s, theta, coeffs, lambda_00_sigma_2)
 
     # Next lets construct the phase of the late inspiral (region IIa)
     # beta0 is found by matching the phase between the region I and IIa
@@ -429,10 +431,10 @@ def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array) -> Arr
     # ==> beta1_correction = phi_Ins'(f1*M_s) - phi_IIa'(f1*M_s)
     # ==> beta0 = phi_Ins(f1*M_s) - phi_IIa(f1*M_s) - beta1_correction*(f1*M_s)
     phi_Ins_f1, dphi_Ins_f1 = jax.value_and_grad(get_inspiral_phase)(
-        f1 * M_s, theta, coeffs
+        f1 * M_s, theta, coeffs, lambda_00_sigma_2
     )
     phi_IIa_f1, dphi_IIa_f1 = jax.value_and_grad(get_IIa_raw_phase)(
-        f1 * M_s, theta, coeffs
+        f1 * M_s, theta, coeffs, lambda_00_sigma_2
     )
 
     beta1_correction = dphi_Ins_f1 - dphi_IIa_f1
@@ -534,6 +536,7 @@ def _gen_IMRPhenomD(
     theta_extrinsic: Array,
     coeffs: Array,
     f_ref: float,
+    lambda_00_sigma_2: float
 ):
     M_s = (theta_intrinsic[0] + theta_intrinsic[1]) * gt
 
@@ -543,7 +546,7 @@ def _gen_IMRPhenomD(
     t0 = jax.grad(get_IIb_raw_phase)(f4 * M_s, theta_intrinsic, coeffs, f_RD, f_damp)
 
     # Lets call the amplitude and phase now
-    Psi = Phase(f, theta_intrinsic, coeffs, transition_freqs)
+    Psi = Phase(f, theta_intrinsic, coeffs, transition_freqs, lambda_00_sigma_2)
     Mf_ref = f_ref * M_s
     Psi_ref = Phase(f_ref, theta_intrinsic, coeffs, transition_freqs)
     Psi -= t0 * ((f * M_s) - Mf_ref) + Psi_ref
@@ -564,7 +567,7 @@ def _gen_IMRPhenomD(
 
 
 # @jax.jit
-def gen_IMRPhenomD(f: Array, params: Array, f_ref: float):
+def gen_IMRPhenomD(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: float):
     """
     Generate PhenomD frequency domain waveform following 1508.07253.
     vars array contains both intrinsic and extrinsic variables
@@ -589,12 +592,12 @@ def gen_IMRPhenomD(f: Array, params: Array, f_ref: float):
     theta_extrinsic = jnp.array([params[4], params[5], params[6]])
 
     coeffs = get_coeffs(theta_intrinsic)
-    h0 = _gen_IMRPhenomD(f, theta_intrinsic, theta_extrinsic, coeffs, f_ref)
+    h0 = _gen_IMRPhenomD(f, theta_intrinsic, theta_extrinsic, coeffs, f_ref, lambda_00_sigma_2)
     return h0
 
 
 # @jax.jit
-def gen_IMRPhenomD_polar(f: Array, params: Array, f_ref: float):
+def gen_IMRPhenomD_polar(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: float):
     """
     Generate PhenomD frequency domain waveform following 1508.07253.
     vars array contains both intrinsic and extrinsic variables
@@ -616,7 +619,7 @@ def gen_IMRPhenomD_polar(f: Array, params: Array, f_ref: float):
       hc (array): Strain of the cross polarization
     """
     iota = params[7]
-    h0 = gen_IMRPhenomD(f, params, f_ref)
+    h0 = gen_IMRPhenomD(f, params, f_ref, lambda_00_sigma_2)
 
     hp = h0 * (1 / 2 * (1 + jnp.cos(iota) ** 2))
     # hc = h0 * jnp.cos(iota)
