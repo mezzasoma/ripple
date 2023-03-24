@@ -434,7 +434,7 @@ def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array, lambda
         f1 * M_s, theta, coeffs, lambda_00_sigma_2
     )
     phi_IIa_f1, dphi_IIa_f1 = jax.value_and_grad(get_IIa_raw_phase)(
-        f1 * M_s, theta, coeffs, lambda_00_sigma_2
+        f1 * M_s, theta, coeffs
     )
 
     beta1_correction = dphi_Ins_f1 - dphi_IIa_f1
@@ -548,7 +548,7 @@ def _gen_IMRPhenomD(
     # Lets call the amplitude and phase now
     Psi = Phase(f, theta_intrinsic, coeffs, transition_freqs, lambda_00_sigma_2)
     Mf_ref = f_ref * M_s
-    Psi_ref = Phase(f_ref, theta_intrinsic, coeffs, transition_freqs)
+    Psi_ref = Phase(f_ref, theta_intrinsic, coeffs, transition_freqs, lambda_00_sigma_2)
     Psi -= t0 * ((f * M_s) - Mf_ref) + Psi_ref
     ext_phase_contrib = 2.0 * PI * f * theta_extrinsic[1] - 2 * theta_extrinsic[2]
     Psi += ext_phase_contrib
