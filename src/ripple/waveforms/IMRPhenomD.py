@@ -18,7 +18,7 @@ from ..typing import Array
 from ripple import Mc_eta_to_ms
 
 
-def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_00_sigma_2) -> Array:
+def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_00_sigma_2: Array) -> Array:
     """
     Calculate the inspiral phase for the IMRPhenomD waveform.
     """
@@ -166,12 +166,17 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_00_sigma
         phi_TF2
         + (
             coeffs[7] * fM_s
-            + (3.0 / 4.0) * (coeffs[8] - lambda_00_sigma_2_IMRPhenomD + lambda_00_sigma_2) * (fM_s ** (4.0 / 3.0))
+            + (3.0 / 4.0) * (coeffs[8] - lambda_00_sigma_2_IMRPhenomD + lambda_00_sigma_2[0]) * (fM_s ** (4.0 / 3.0))
             + (3.0 / 5.0) * coeffs[9] * (fM_s ** (5.0 / 3.0))
             + (1.0 / 2.0) * coeffs[10] * (fM_s ** 2.0)
         )
         / eta
     )
+    # print('made it to line 175')
+    # print(jnp.shape(phi_Ins))
+    # print(type(phi_Ins))
+    # return phi_Ins
+    # print(phi_Ins)
     return phi_Ins
 
 
@@ -397,7 +402,7 @@ def get_IIb_Amp(fM_s: Array, theta: Array, coeffs: Array, f_RD, f_damp) -> Array
 
 
 # @jax.jit
-def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array, lambda_00_sigma_2: float) -> Array:
+def Phase(f: Array, theta: Array, coeffs: Array, transition_freqs: Array, lambda_00_sigma_2: Array) -> Array:
     """
     Computes the phase of the PhenomD waveform following 1508.07253.
     Sets time and phase of coealence to be zero.
@@ -536,7 +541,7 @@ def _gen_IMRPhenomD(
     theta_extrinsic: Array,
     coeffs: Array,
     f_ref: float,
-    lambda_00_sigma_2: float
+    lambda_00_sigma_2: Array
 ):
     M_s = (theta_intrinsic[0] + theta_intrinsic[1]) * gt
 
@@ -567,7 +572,7 @@ def _gen_IMRPhenomD(
 
 
 # @jax.jit
-def gen_IMRPhenomD(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: float):
+def gen_IMRPhenomD(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: Array):
     """
     Generate PhenomD frequency domain waveform following 1508.07253.
     vars array contains both intrinsic and extrinsic variables
@@ -597,7 +602,7 @@ def gen_IMRPhenomD(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: flo
 
 
 # @jax.jit
-def gen_IMRPhenomD_polar(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: float):
+def gen_IMRPhenomD_polar(f: Array, params: Array, f_ref: float, lambda_00_sigma_2: Array):
     """
     Generate PhenomD frequency domain waveform following 1508.07253.
     vars array contains both intrinsic and extrinsic variables
