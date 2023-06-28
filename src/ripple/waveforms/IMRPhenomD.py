@@ -182,8 +182,7 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma_2:
     -114585.25177153319,
     674402.4689098676,
     ]
-    print('here!')
-    print(lambda_sigma_2)
+    
     sigma_2 = (
     lambda_sigma_2[0]
     + lambda_sigma_2[1] * eta
