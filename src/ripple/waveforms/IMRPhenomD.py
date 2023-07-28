@@ -180,7 +180,7 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma_2:
     1.6318171307344697e6,
     -7462.648563007646,
     -114585.25177153319,
-    674402.4689098676,
+    674402.4689098676
     ]
     
     sigma_2 = (
@@ -194,15 +194,15 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma_2:
     )
     + (chiPN - 1.0) ** 2.0
     * (
-        lambda_sigma_2_table[5]
-        + lambda_sigma_2_table[6] * eta
-        + lambda_sigma_2_table[7] * (eta ** 2.0)
+        lambda_sigma_2[5]
+        + lambda_sigma_2[6] * eta
+        + lambda_sigma_2[7] * (eta ** 2.0)
     )
     + (chiPN - 1.0) ** 3.0
     * (
-        lambda_sigma_2_table[8]
-        + lambda_sigma_2_table[9] * eta
-        + lambda_sigma_2_table[10] * (eta ** 2.0)
+        lambda_sigma_2[8]
+        + lambda_sigma_2[9] * eta
+        + lambda_sigma_2[10] * (eta ** 2.0)
     )
     )
 
