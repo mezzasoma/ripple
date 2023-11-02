@@ -242,6 +242,8 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma: A
     )
     )
 
+    # print(lambda_sigma[11])
+
     phi_Ins = (
         phi_TF2
         + (
