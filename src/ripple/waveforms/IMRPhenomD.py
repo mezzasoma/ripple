@@ -195,7 +195,7 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma: A
     467502.018616601,
     -3.064853498512499e6
     ]
-    
+    # activated all coeffs of sigma_2
     sigma_2 = (
     lambda_sigma[0]
     + lambda_sigma[1] * eta
@@ -218,27 +218,27 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma: A
         + lambda_sigma[10] * (eta ** 2.0)
     )
     )
-    # activated only the first coeff of sigma_3
+    # activated all coeffs of sigma_3
     sigma_3 = (
     lambda_sigma[11]
-    + lambda_sigma_3_table[1] * eta
+    + lambda_sigma[12] * eta
     + (chiPN - 1.0)
     * (
-        lambda_sigma_3_table[2]
-        + lambda_sigma_3_table[3] * eta
-        + lambda_sigma_3_table[4] * (eta ** 2.0)
+        lambda_sigma[13]
+        + lambda_sigma[14] * eta
+        + lambda_sigma[15] * (eta ** 2.0)
     )
     + (chiPN - 1.0) ** 2.0
     * (
-        lambda_sigma_3_table[5]
-        + lambda_sigma_3_table[6] * eta
-        + lambda_sigma_3_table[7] * (eta ** 2.0)
+        lambda_sigma[16]
+        + lambda_sigma[17] * eta
+        + lambda_sigma[18] * (eta ** 2.0)
     )
     + (chiPN - 1.0) ** 3.0
     * (
-        lambda_sigma_3_table[8]
-        + lambda_sigma_3_table[9] * eta
-        + lambda_sigma_3_table[10] * (eta ** 2.0)
+        lambda_sigma[19]
+        + lambda_sigma[20] * eta
+        + lambda_sigma[21] * (eta ** 2.0)
     )
     )
 
