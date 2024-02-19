@@ -182,19 +182,36 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma: A
     # ]
 
     # Define sigma_3 here
-    lambda_sigma_3_table = [
-    22933.658273436497,
-    230960.00814979506,
-    14961.083974183695,
-    1.1940181342318142e6,
-    -3.1042239693052764e6,
-    -3038.166617199259,
-    1.8720322849093592e6,
-    -7.309145012085539e6,
-    42738.22871475411,
-    467502.018616601,
-    -3.064853498512499e6
+    # lambda_sigma_3_table = [
+    # 22933.658273436497,
+    # 230960.00814979506,
+    # 14961.083974183695,
+    # 1.1940181342318142e6,
+    # -3.1042239693052764e6,
+    # -3038.166617199259,
+    # 1.8720322849093592e6,
+    # -7.309145012085539e6,
+    # 42738.22871475411,
+    # 467502.018616601,
+    # -3.064853498512499e6
+    # ]
+
+    # Define sigma_4 here
+    lambda_sigma_4_table = [
+    -14621.71522218357,
+    -377812.8579387104,
+    -9608.682631509726,
+    -1.7108925257214056e6,
+    4.332924601416521e6,
+    -22366.683262266528,
+    -2.5019716386377467e6,
+    1.0274495902259542e7,
+    -85360.30079034246,
+    -570025.3441737515,
+    4.396844346849777e6,
     ]
+
+
     # activated all coeffs of sigma_2
     sigma_2 = (
     lambda_sigma[0]
@@ -242,6 +259,29 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma: A
     )
     )
 
+    # activated first coeff of sigma_4
+    sigma_4 = (
+    lambda_sigma[22]
+    + lambda_sigma_4_table[1] * eta
+    + (chiPN - 1.0)
+    * (
+        lambda_sigma_4_table[2]
+        + lambda_sigma_4_table[3] * eta
+        + lambda_sigma_4_table[4] * (eta ** 2.0)
+    )
+    + (chiPN - 1.0) ** 2.0
+    * (
+        lambda_sigma_4_table[5]
+        + lambda_sigma_4_table[6] * eta
+        + lambda_sigma_4_table[7] * (eta ** 2.0)
+    )
+    + (chiPN - 1.0) ** 3.0
+    * (
+        lambda_sigma_4_table[8]
+        + lambda_sigma_4_table[9] * eta
+        + lambda_sigma_4_table[10] * (eta ** 2.0)
+    )
+    )
 
     phi_Ins = (
         phi_TF2
@@ -249,7 +289,7 @@ def get_inspiral_phase(fM_s: Array, theta: Array, coeffs: Array, lambda_sigma: A
             coeffs[7] * fM_s
             + (3.0 / 4.0) * sigma_2 * (fM_s ** (4.0 / 3.0))
             + (3.0 / 5.0) * sigma_3 * (fM_s ** (5.0 / 3.0))
-            + (1.0 / 2.0) * coeffs[10] * (fM_s ** 2.0)
+            + (1.0 / 2.0) * sigma_4 * (fM_s ** 2.0)
         )
         / eta
     )
